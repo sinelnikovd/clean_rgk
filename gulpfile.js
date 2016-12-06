@@ -40,6 +40,7 @@ rename = require('gulp-rename'),
 plumber = require('gulp-plumber'),
 filter = require('gulp-filter'),
 changed = require('gulp-changed'),
+inlinesource = require('gulp-inline-source'),
 replace = require('gulp-replace'),
 runSequence = require('run-sequence');
 
@@ -86,6 +87,26 @@ gulp.task('styles', function () {
 	.pipe(browserSync.reload({stream: true}));
 });
 
+
+gulp.task('styles:inline', function () {
+	gulp.src('dev/sass/inline/*.sass')
+	.pipe(globbing({
+		extensions: ['.scss','.sass']
+	}))
+	.pipe(sass({
+		includePaths: require('node-bourbon').includePaths
+	})).on('error', sass.logError)
+	.pipe(rename({suffix: '.min', prefix : '_'}))
+	.pipe(autoprefixer({
+		browsers: ['last 15 versions'],
+		cascade: false
+	}))
+	.pipe(gcmq())
+	.pipe(cleanCSS())
+	.pipe(gulp.dest('dev/inline'))
+	.pipe(browserSync.reload({stream: true}));
+});
+
 gulp.task('sass:lint', function () {
 	return gulp.src(['dev/{sass, blocks}/**/*.s+(a|c)ss', '!dev/sass/**/_*.s+(a|c)ss'])
 		.pipe(sassLint({
@@ -107,6 +128,9 @@ gulp.task('pug', function() {
 		basedir: 'dev',
 		pretty: true
 	})).on('error', console.log)
+	.pipe(inlinesource({
+		rootpath: "dev/"
+	}))
 	.pipe(gulp.dest('app'));
 });
 
@@ -192,9 +216,12 @@ gulp.task('copy', () => (
 
 
 
-gulp.task('watch', ['bs', 'rename-bemto', 'copy', 'svgSprite', 'pngSprite', 'pug', 'pug:lint', 'styles', 'sass:lint', 'vendor', 'js'],  function () {
-	gulpWatch('dev/{sass, blocks}/**/*.sass', function(){
+gulp.task('watch', ['bs', 'rename-bemto', 'copy', 'svgSprite', 'pngSprite', 'pug', 'pug:lint', 'styles', 'styles:inline', 'sass:lint', 'vendor', 'js'],  function () {
+	gulpWatch(['dev/{sass, blocks}/**/*.sass', '!dev/sass/inline/*.sass'], function(){
 		runSequence(['styles', 'sass:lint']);
+	});
+	gulpWatch('dev/sass/inline/*.sass', function(){
+		runSequence(['styles:inline', 'sass:lint', 'pug'], browserSync.reload);
 	});
 	gulpWatch('dev/{pug, blocks}/**/*.pug', function(){
 		runSequence(['pug', 'pug:lint'], browserSync.reload);

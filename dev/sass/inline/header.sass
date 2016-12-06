@@ -1,0 +1,32 @@
+@import 'bourbon'
+@import '../basic/*.*'
+@import 'helpers/*.*'
+
+
+$noop: 0
+
+*
+	+placeholder
+		color: $c-placeholder
+		opacity: 1
+
+body
+	background-color: $c-white
+	color: $c-default
+	font: normal 14px/1.3em $helvetica
+	min-width: 1200px
+	overflow-x: hidden
+	position: relative
+
+	input
+		&:focus
+			&:required
+				&:invalid
+					color: $c-placeholder
+
+	textarea
+		&:focus
+			&:required
+				&:invalid
+					color: $c-placeholder
+
