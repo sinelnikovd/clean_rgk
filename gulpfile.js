@@ -170,7 +170,7 @@ gulp.task('svgSprite', function() {
 
 
 gulp.task('pngSprite', function() {
-	var spriteData = 
+	var spriteData =
 		gulp.src('dev/png-sprite/**/*.*')
 			.pipe(plumber({
 					handleError: function (err) {
@@ -209,7 +209,7 @@ gulp.task('js', function() {
 
 
 gulp.task('copy', () => (
-	gulp.src('dev/resources/**/**/*')
+	gulp.src('dev/resources/**/*')
 		.pipe(changed('app'))
 		.pipe(gulp.dest('app'))
 ));
@@ -232,6 +232,10 @@ gulp.task('watch', ['bs', 'rename-bemto', 'copy', 'svgSprite', 'pngSprite', 'pug
 	gulpWatch('dev/js/*.js', function(){
 		runSequence('js', browserSync.reload);
 	});
+	});
+	gulpWatch('dev/resources/**/*', function(){
+		runSequence('copy', browserSync.reload);
+	});
 
 	gulpWatch(['dev/png-sprite/**/*.png',  '!dev/png-sprite/*.png'], function(){
 		runSequence(['pngSprite', 'styles'], browserSync.reload);
@@ -240,4 +244,3 @@ gulp.task('watch', ['bs', 'rename-bemto', 'copy', 'svgSprite', 'pngSprite', 'pug
 		runSequence(['svgSprite', 'styles'], browserSync.reload);
 	});
 });
-
