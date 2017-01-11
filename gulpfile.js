@@ -190,7 +190,7 @@ gulp.task('pngSprite', function() {
 });
 
 gulp.task('vendor', function() {
-	gulp.src('dev/js/**/**/*.js')
+	gulp.src(['dev/js/**/*.js', '!dev/js/*.js'])
 	.pipe(order([
 		"modernizr/modernizr.js",
 		"jquery/jquery-3.1.0.min.js",
@@ -203,27 +203,32 @@ gulp.task('vendor', function() {
 
 gulp.task('js', function() {
 	gulp.src('dev/js/*.js')
+	.pipe(plumber({
+			handleError: function (err) {
+				console.log(err);
+			}
+		}))
 	.pipe(uglify())
 	.pipe(gulp.dest('app/js/'));
 });
 
 
-gulp.task('copy', () => (
-	gulp.src('dev/resources/**/*')
+gulp.task('copy', function() {
+	gulp.src(['dev/resources/**/*', '!dev/resources/**/*_tmp*'])
 		.pipe(changed('app'))
 		.pipe(gulp.dest('app'))
-));
+});
 
 
 
 gulp.task('watch', ['bs', 'rename-bemto', 'copy', 'svgSprite', 'pngSprite', 'pug', 'pug:lint', 'styles', 'styles:inline', 'sass:lint', 'vendor', 'js'],  function () {
-	gulpWatch(['dev/{sass, blocks}/**/*.sass', '!dev/sass/inline/*.sass'], function(){
+	gulpWatch(['dev/sass/**/*.sass', 'dev/blocks/**/*.sass'], function(){
 		runSequence(['styles', 'sass:lint']);
 	});
 	gulpWatch('dev/sass/inline/*.sass', function(){
 		runSequence(['styles:inline', 'sass:lint', 'pug'], browserSync.reload);
 	});
-	gulpWatch('dev/{pug, blocks}/**/*.pug', function(){
+	gulpWatch(['dev/pug/**/*.pug', 'dev/blocks/**/*.pug'], function(){
 		runSequence(['pug', 'pug:lint'], browserSync.reload);
 	});
 	gulpWatch(['dev/js/**/*.js', '!dev/js/*.js'], function(){
