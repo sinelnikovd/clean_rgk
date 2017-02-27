@@ -1,0 +1,62 @@
+//-в начале документа перед <html>
+mixin php-before-html()
+	<?php include '../system/files/includes/head_php.php';?>
+
+//-перед </head>
+mixin php-head()
+	script(src="js/libs/jquery-3.1.0.min.js")
+	<?php include '../system/files/includes/head_html.php';?>
+
+//-вместо реквизитов
+mixin php-footer-txt()
+	<?php include '../system/files/includes/footer_txt.php';?>
+
+//-перед </body>
+mixin php-before-body()
+	<?php include '../system/files/includes/footer_html.php';?>
+
+//-в конце документа после </html>
+mixin php-end()
+	<?php include '../system/files/includes/footer_php.php';?>
+
+//-в подвале рядом с реквизитами разместить следующую ссылку на Политику конфиденциальности
+mixin php-privacy()
+	<a href="#" modal="polit">Политика конфиденциальности</a>
+
+//-стоимость продукта ДО скидки
+mixin php-price-1()
+	<span class="price_land_s4"><?=$land_default_prices['s4']?></span>
+
+//-стоимость продукта ПОСЛЕ скидки БЕЗ стоимость доставки
+mixin php-price-2()
+	<span class="price_land_s1"><?=$land_default_prices['s1']?></span>
+
+//-стоимость доставки
+mixin php-price-3()
+	<span class="price_land_s2"><?=$land_default_prices['s2']?></span>
+
+//-валюта
+mixin php-cyr()
+	<span class="price_land_curr"><?=$land_default_prices['curr']?></span>
+
+//-Настройка формы
+mixin php-form()
+	+b.FORM.form&attributes(action="success.php", method="POST", attributes)
+		block
+		<input type="hidden" name="s1" class="price_field_s1" value="<?=$land_default_prices['s1']?>" />
+		<input type="hidden" name="s2" class="price_field_s2" value="<?=$land_default_prices['s2']?>" />
+		<input type="hidden" name="s3" class="price_field_s3" value="<?=$land_default_prices['s3']?>" />
+		<?=$form_hidden_fields?>
+
+//-Поле имя
+mixin php-name()
+	+b.INPUT.field&attributes(type="text", name="name", placeholder="Ваше имя", attributes)
+
+//-Поле телефон
+mixin php-phone()
+	+b.INPUT.field&attributes(type="tel", name="name", placeholder="+7 (777) 123-45-65", attributes)
+
+//-Поле страна
+mixin php-country()
+	+b.SELECT.country_select&attributes(name="country", attributes)
+		<?=$country_list?>

@@ -6,13 +6,13 @@
 $noop: 0
 
 *
-	+placeholder
-		color: $c-placeholder
+	&:placeholder
+		color: $cp
 		opacity: 1
 
 body
-	background-color: $c-white
-	color: $c-default
+	background-color: $cw
+	color: $cb
 	font: normal 14px/1.3em $helvetica
 	min-width: 1200px
 	overflow-x: hidden
@@ -22,11 +22,10 @@ body
 		&:focus
 			&:required
 				&:invalid
-					color: $c-placeholder
+					color: $cp
 
 	textarea
 		&:focus
 			&:required
 				&:invalid
-					color: $c-placeholder
-
+					color: $cp

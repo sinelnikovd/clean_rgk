@@ -5,7 +5,6 @@ browserSync = require('browser-sync'),
 *  SASS
 **/
 sass = require('gulp-sass'),
-sassLint = require('gulp-sass-lint'),
 globbing = require('gulp-css-globbing'),
 cleanCSS = require('gulp-clean-css'),
 gcmq = require('gulp-group-css-media-queries'),
@@ -83,7 +82,7 @@ gulp.task('styles', function () {
 	}))
 	.pipe(gcmq())
 	.pipe(cleanCSS())
-	.pipe(gulp.dest('app'))
+	.pipe(gulp.dest('app/css'))
 	.pipe(browserSync.reload({stream: true}));
 });
 
@@ -107,14 +106,6 @@ gulp.task('styles:inline', function () {
 	.pipe(browserSync.reload({stream: true}));
 });
 
-gulp.task('sass:lint', function () {
-	return gulp.src(['dev/{sass, blocks}/**/*.s+(a|c)ss', '!dev/sass/**/_*.s+(a|c)ss'])
-		.pipe(sassLint({
-			configFile: 'sass-lint.yml'
-		}))
-		.pipe(sassLint.format())
-		.pipe(sassLint.failOnError())
-});
 
 
 gulp.task('pug', function() {
@@ -126,11 +117,13 @@ gulp.task('pug', function() {
 	}))
 	.pipe(pug({
 		basedir: 'dev',
-		pretty: true
+		pretty: true,
 	})).on('error', console.log)
 	.pipe(inlinesource({
 		rootpath: "dev/"
 	}))
+	.pipe(gulp.dest('app'))
+	.pipe(rename({extname: ".php"}))
 	.pipe(gulp.dest('app'));
 });
 
@@ -144,6 +137,11 @@ gulp.task('pug:lint', () =>
 
 gulp.task('svgSprite', function() {
 	gulp.src('dev/svg-sprite/*.svg')
+	.pipe(plumber({
+			handleError: function (err) {
+				console.log(err);
+			}
+		}))
 	.pipe(svgmin({
 			js2svg: {
 				pretty: true
@@ -151,8 +149,8 @@ gulp.task('svgSprite', function() {
 		}))
 	.pipe(svgsprite({
 		preview: false,
-		svgPath: "media/img/svg/sprite.svg",
-		pngPath: "media/img/svg/sprite.png",
+		svgPath: "img/svg/sprite.svg",
+		pngPath: "img/svg/sprite.png",
 		templates: {
 			css: require("fs").readFileSync('svg_sprite_tmpl.scss', "utf-8")
 		},
@@ -162,10 +160,10 @@ gulp.task('svgSprite', function() {
 		cssFile: '../../../dev/sass/helpers/_svg_sprite.scss',
 
 	}))
-	.pipe(gulp.dest("app/media/img"))
+	.pipe(gulp.dest("app/img"))
 	.pipe(filter("**/*.svg"))
 	.pipe(svg2png())
-	.pipe(gulp.dest("app/media/img"));
+	.pipe(gulp.dest("app/img"));
 });
 
 
@@ -179,27 +177,16 @@ gulp.task('pngSprite', function() {
 				}))
 			.pipe(spritesmith({
 				spritesmith: function (options) {
-					options.imgPath = 'media/img/' + options.imgName;
-					options.retinaImgPath = 'media/img/' + options.retinaImgName;
+					options.imgPath = 'img/' + options.imgName;
+					options.retinaImgPath = 'img/' + options.retinaImgName;
 					options.algorithm = 'binary-tree';
 					options.cssName = '_sprite.scss';
 				}
 			}));
-	spriteData.img.pipe(gulp.dest('app/media/img/'));
+	spriteData.img.pipe(gulp.dest('app/img/'));
 	spriteData.css.pipe(gulp.dest('dev/sass/helpers/'));
 });
 
-gulp.task('vendor', function() {
-	gulp.src(['dev/js/**/*.js', '!dev/js/*.js'])
-	.pipe(order([
-		"modernizr/modernizr.js",
-		"jquery/jquery-3.1.0.min.js",
-		"libs/**/*.js"
-	]))
-	.pipe(concat('vendor.js'))
-	.pipe(uglify())
-	.pipe(gulp.dest('app/js/'));
-});
 
 gulp.task('js', function() {
 	gulp.src('dev/js/*.js')
@@ -221,31 +208,28 @@ gulp.task('copy', function() {
 
 
 
-gulp.task('watch', ['bs', 'rename-bemto', 'copy', 'svgSprite', 'pngSprite', 'pug', 'pug:lint', 'styles', 'styles:inline', 'sass:lint', 'vendor', 'js'],  function () {
+gulp.task('watch', ['bs', 'rename-bemto', 'copy', 'svgSprite', 'pngSprite', 'pug', 'pug:lint', 'styles', 'styles:inline', 'js'],  function () {
 	gulpWatch(['dev/sass/**/*.sass', 'dev/blocks/**/*.sass'], function(){
-		runSequence(['styles', 'sass:lint']);
+		runSequence('styles');
 	});
 	gulpWatch('dev/sass/inline/*.sass', function(){
-		runSequence(['styles:inline', 'sass:lint', 'pug'], browserSync.reload);
+		runSequence('styles:inline', 'pug', browserSync.reload);
 	});
 	gulpWatch(['dev/pug/**/*.pug', 'dev/blocks/**/*.pug'], function(){
-		runSequence(['pug', 'pug:lint'], browserSync.reload);
+		runSequence('pug', 'pug:lint', browserSync.reload);
 	});
-	gulpWatch(['dev/js/**/*.js', '!dev/js/*.js'], function(){
-		runSequence('vendor', browserSync.reload);
-	});
+
 	gulpWatch('dev/js/*.js', function(){
 		runSequence('js', browserSync.reload);
-	});
 	});
 	gulpWatch('dev/resources/**/*', function(){
 		runSequence('copy', browserSync.reload);
 	});
 
 	gulpWatch(['dev/png-sprite/**/*.png',  '!dev/png-sprite/*.png'], function(){
-		runSequence(['pngSprite', 'styles'], browserSync.reload);
+		runSequence('pngSprite', 'styles', browserSync.reload);
 	});
 	gulpWatch('dev/svg-sprite/*.svg', function(){
-		runSequence(['svgSprite', 'styles'], browserSync.reload);
+		runSequence('svgSprite', 'styles', browserSync.reload);
 	});
 });
