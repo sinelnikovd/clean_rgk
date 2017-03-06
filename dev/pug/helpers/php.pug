@@ -4,8 +4,10 @@ mixin php-before-html()
 
 //-перед </head>
 mixin php-head()
-	script(src="js/libs/jquery-3.1.0.min.js")
+	//-TODO: JQUERY ?
+	//-script(src="js/libs/jquery-3.1.0.min.js")
 	<?php include '../system/files/includes/head_html.php';?>
+	<?php include '../gelmifort.ru/shared_files/includes.php';?>
 
 //-вместо реквизитов
 mixin php-footer-txt()
@@ -41,12 +43,13 @@ mixin php-cyr()
 
 //-Настройка формы
 mixin php-form()
-	+b.FORM.form&attributes(action="success.php", method="POST", attributes)
-		block
-		<input type="hidden" name="s1" class="price_field_s1" value="<?=$land_default_prices['s1']?>" />
-		<input type="hidden" name="s2" class="price_field_s2" value="<?=$land_default_prices['s2']?>" />
-		<input type="hidden" name="s3" class="price_field_s3" value="<?=$land_default_prices['s3']?>" />
-		<?=$form_hidden_fields?>
+	form&attributes(action="success.php", method="POST", attributes)
+
+mixin php-form-bottom()
+	<input type="hidden" name="s1" class="price_field_s1" value="<?=$land_default_prices['s1']?>" />
+	<input type="hidden" name="s2" class="price_field_s2" value="<?=$land_default_prices['s2']?>" />
+	<input type="hidden" name="s3" class="price_field_s3" value="<?=$land_default_prices['s3']?>" />
+	<?=$form_hidden_fields?>
 
 //-Поле имя
 mixin php-name()
